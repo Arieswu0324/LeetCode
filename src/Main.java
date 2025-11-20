@@ -1,107 +1,38 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(reverseWords("  hello world  "));
+        int[] h = {0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1};
+
+        System.out.println(trap(h));
     }
 
+    public static int trap(int[] height) {
+        Deque<Integer> stack = new ArrayDeque<>();
+        stack.push(0);
+        int sum = 0;
 
-    public static String convert(String s, int numRows) {
-        List<List<Character>> list = new ArrayList<>();
-        for (int i = 0; i < numRows; i++) {
-            list.add(new ArrayList<>());
-        }
-
-        int flag = 1;
-
-        char[] chars = s.toCharArray();
-        int startIndex = 0;
-        int endIndex = numRows - 1;
-
-        int i = startIndex;
-
-        for (char c : chars) {
-            list.get(i).add(c);
-            if (i == endIndex) {
-                flag = -1;
-            } else if (i == startIndex) {
-                flag = 1;
-            }
-
-            i += flag;
-        }
-
-        return list.stream().flatMap(List::stream).map(String::valueOf).collect(Collectors.joining());
-    }
-
-    public static String reverseWords(String s) {
-        s = s.trim();
-        String[] splts = s.split(" ");
-        List<String> words = new ArrayList<>();
-        for (String str : splts) {
-            str = str.trim();
-            if (!str.isBlank()) {
-                words.add(str);
+        for (int i = 1; i < height.length; i++) {
+            if ( height[i] > height[stack.peek()]) {
+                while ( !stack.isEmpty() && height[i] > height[stack.peek()]) {
+                    int left = height[i];
+                    int mid = height[stack.pop()];
+                    if (stack.isEmpty()) {
+                        break;
+                    }
+                    int right = height[stack.peek()];
+                    int h = Math.min(left, right) - mid;
+                    int w = i-stack.peek() - 1;
+                    sum += h * w;
+                }
+                stack.push(i);
+            } else {
+                stack.push(i);
             }
         }
-        return String.join(" ", words.reversed());
+        return sum;
     }
 
-    public Node copyRandomList(Node head) {
-        if (head == null) {
-            return null;
-        }
-
-        //node -> copy
-        Map<Node, Node> copyMap = new HashMap<>();
-
-
-        Node cur = head;
-        Node copyHead = new Node(cur.val);
-        copyMap.put(head, copyHead);
-        Node copyCur = copyHead;
-
-        //先复制链表
-        while (cur.next!= null) {
-            cur = cur.next;
-            Node curNode = new Node(cur.val);
-            copyMap.put(cur, curNode);
-            copyCur.next = curNode;
-            copyCur = copyCur.next;
-        }
-
-        //再复制随机指针
-        cur = head;
-        copyCur = copyHead;
-        while (cur!= null) {
-            Node random =cur.random;
-            if(random==null){
-                copyCur.random=null;
-            }else {
-                Node copyNode = copyMap.get(random);
-                copyCur.random = copyNode;
-            }
-            cur = cur.next;
-            copyCur = copyCur.next;
-        }
-
-        return copyHead;
-    }
-
-    // Definition for a Node.
-    class Node {
-        int val;
-        Node next;
-        Node random;
-
-        public Node(int val) {
-            this.val = val;
-            this.next = null;
-            this.random = null;
-        }
-    }
 }
+
